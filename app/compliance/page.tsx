@@ -54,12 +54,12 @@ export default async function CompliancePage() {
       </div>
 
       {/* Page header */}
-      <div style={{ padding: '1.75rem 2rem 0' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
         <p className="restricted-label">
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--red-bright)', display: 'inline-block' }} />
           RESTRICTED AREA
         </p>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', letterSpacing: '-0.025em', marginTop: '0.375rem' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', letterSpacing: '-0.025em', marginTop: '0.375rem' }}>
           Compliance Vault
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
@@ -67,7 +67,7 @@ export default async function CompliancePage() {
         </p>
       </div>
 
-      <div style={{ padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
         {/* Stat row */}
         <div className="grid-4">
