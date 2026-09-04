@@ -19,21 +19,21 @@ export default function TextSplashScreen() {
 
     setVisible(true)
 
-    // Step 1 -> Step 2 transition after 1.2 seconds
+    // Step 1 -> Step 2 transition after 2.2 seconds
     const stepTimer = setTimeout(() => {
       setStep(2)
-    }, 1200)
+    }, 2200)
 
-    // Start fading out after 2.4 seconds
+    // Start fading out after 4.4 seconds
     const fadeTimer = setTimeout(() => {
       setFading(true)
-    }, 2400)
+    }, 4400)
 
-    // Unmount and save flag after 2.8 seconds
+    // Unmount and save flag after 4.8 seconds
     const removeTimer = setTimeout(() => {
       setVisible(false)
       sessionStorage.setItem('aegis_splash_shown_v2', 'true')
-    }, 2800)
+    }, 4800)
 
     return () => {
       clearTimeout(stepTimer)
