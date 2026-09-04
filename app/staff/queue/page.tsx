@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SeverityBadge from '@/components/ui/SeverityBadge'
 import CategoryBadge from '@/components/ui/CategoryBadge'
-import { formatDistanceToNow } from 'date-fns'
+import QueueFilterBar from '@/components/staff/QueueFilterBar'
 import { AlertTriangle, Inbox, Lock } from 'lucide-react'
 import type { ComplaintStatus, ComplaintCategory, ComplaintSeverity } from '@/types/database'
 
@@ -147,41 +147,11 @@ export default async function StaffQueuePage({ searchParams }: PageProps) {
       </div>
 
       {/* Filters */}
-      <div className="filter-bar" role="search" aria-label="Filter complaint queue">
-        <span className="filter-bar-label">Filter:</span>
-
-        <form style={{ display: 'contents' }}>
-          <select
-            name="status"
-            className="filter-select"
-            defaultValue={params.status ?? ''}
-            onChange={e => e.target.form?.requestSubmit()}
-            aria-label="Filter by status"
-          >
-            <option value="">All Statuses</option>
-            {['submitted', 'reviewed', 'assigned', 'in_progress', 'resolved', 'disputed'].map(s => (
-              <option key={s} value={s}>{s.replace('_', ' ')}</option>
-            ))}
-          </select>
-
-          <select
-            name="severity"
-            className="filter-select"
-            defaultValue={params.severity ?? ''}
-            onChange={e => e.target.form?.requestSubmit()}
-            aria-label="Filter by severity"
-          >
-            <option value="">All Severities</option>
-            {['critical', 'high', 'medium', 'low'].map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-
-          {params.escalated && (
-            <Link href="/staff/queue" className="btn btn-ghost btn-sm">Clear Escalated Filter</Link>
-          )}
-        </form>
-      </div>
+      <QueueFilterBar
+        currentStatus={params.status}
+        currentSeverity={params.severity}
+        isEscalated={params.escalated === 'true'}
+      />
 
       {error ? (
         <div className="alert alert-danger" role="alert">Failed to load queue. Please refresh.</div>
