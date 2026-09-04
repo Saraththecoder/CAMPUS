@@ -1,8 +1,12 @@
+'use client'
 // components/complaints/ComplaintCard.tsx
-// Aegis-7 AGS-style complaint card for the public feed.
+// Aegis-7 AGS-style complaint card for the public feed with real-time support action.
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { FileText, Clock, RefreshCw } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { FileText, Clock, RefreshCw, Loader2, ThumbsUp } from 'lucide-react'
 import type { PublicComplaint } from '@/types/database'
 import CategoryBadge from '@/components/ui/CategoryBadge'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -35,6 +39,11 @@ function agsId(id: string): string {
 }
 
 export default function ComplaintCard({ complaint }: Props) {
+  const router = useRouter()
+  const [supportCount, setSupportCount] = useState(complaint.support_count)
+  const [supporting, setSupporting] = useState(false)
+  const [hasSupported, setHasSupported] = useState(false)
+
   const isResolved = ['resolved', 'verified'].includes(complaint.status)
   const isDisputed = complaint.status === 'disputed'
   const isCritical = complaint.severity === 'critical'
@@ -44,6 +53,45 @@ export default function ComplaintCard({ complaint }: Props) {
     : isCritical ? 'var(--red-bright)'
     : isDisputed ? 'var(--amber-bright)'
     : 'transparent'
+
+  const handleSupport = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (supporting) return
+    setSupporting(true)
+
+    try {
+      const res = await fetch(`/api/complaints/${complaint.id}/support`, {
+        method: 'POST',
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          toast.error('Please sign in to support this complaint')
+          router.push(`/login?redirect=/complaints/${complaint.id}`)
+          return
+        }
+        toast.error(data.error ?? 'Failed to add support')
+        return
+      }
+
+      if (data.supported) {
+        setSupportCount(prev => prev + 1)
+        setHasSupported(true)
+        toast.success('Support added to complaint')
+      } else if (data.alreadySupported) {
+        setHasSupported(true)
+        toast.info('You have already supported this complaint')
+      }
+    } catch {
+      toast.error('Error adding support')
+    } finally {
+      setSupporting(false)
+    }
+  }
 
   return (
     <article
@@ -114,12 +162,12 @@ export default function ComplaintCard({ complaint }: Props) {
             <p className="dispute-timer">Time remaining: {disputeTimeLeft(complaint.dispute_deadline)}</p>
           </div>
           <div className="dispute-actions">
-            <button className="btn btn-secondary btn-sm" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+            <Link href={`/complaints/${complaint.id}`} className="btn btn-secondary btn-sm" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
               Dispute
-            </button>
-            <button className="btn btn-primary btn-sm" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+            </Link>
+            <Link href={`/complaints/${complaint.id}`} className="btn btn-primary btn-sm" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
               Confirm Resolution
-            </button>
+            </Link>
           </div>
         </div>
       )}
@@ -137,13 +185,30 @@ export default function ComplaintCard({ complaint }: Props) {
             </span>
           )}
           <div className="ags-support-btn">
-            <button className="ags-support-action" aria-label={`Support complaint ${complaint.id}`}>
-              👍 +1 Support
+            <button
+              type="button"
+              onClick={handleSupport}
+              disabled={supporting}
+              className={`ags-support-action ${hasSupported ? 'active' : ''}`}
+              aria-label={`Support complaint ${complaint.id}`}
+              style={{
+                background: hasSupported ? 'var(--green-faint)' : undefined,
+                color: hasSupported ? 'var(--green-bright)' : undefined,
+              }}
+            >
+              {supporting ? (
+                <Loader2 size={12} className="btn-loading" />
+              ) : (
+                <><ThumbsUp size={12} /> {hasSupported ? 'Supported' : '+1 Support'}</>
+              )}
             </button>
-            <span className="ags-support-count">{complaint.support_count}</span>
+            <span className="ags-support-count" style={{ color: hasSupported ? 'var(--green-bright)' : undefined }}>
+              {supportCount}
+            </span>
           </div>
         </div>
       </div>
     </article>
   )
 }
+

@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Nav Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
         <Link href="/admin/users" className="card" style={{ padding: '1.25rem', textDecoration: 'none', transition: 'all 150ms ease' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
             <Users size={18} style={{ color: 'var(--green-bright)' }} />

@@ -267,7 +267,7 @@ export default function UserManagementView() {
             <h2 style={{ fontSize: '1rem', fontWeight: 700 }}>Existing User Accounts ({users.length})</h2>
           </div>
 
-          <div style={{ position: 'relative', width: 260 }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: 260, flex: '1 1 200px' }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: 10, color: 'var(--text-muted)' }} />
             <input
               type="text"

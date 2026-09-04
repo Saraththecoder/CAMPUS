@@ -70,6 +70,7 @@ export default async function StaffQueuePage({ searchParams }: PageProps) {
             name="status"
             className="filter-select"
             defaultValue={params.status ?? ''}
+            onChange={e => e.target.form?.requestSubmit()}
             aria-label="Filter by status"
           >
             <option value="">All Statuses</option>
@@ -82,6 +83,7 @@ export default async function StaffQueuePage({ searchParams }: PageProps) {
             name="severity"
             className="filter-select"
             defaultValue={params.severity ?? ''}
+            onChange={e => e.target.form?.requestSubmit()}
             aria-label="Filter by severity"
           >
             <option value="">All Severities</option>

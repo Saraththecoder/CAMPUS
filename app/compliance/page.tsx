@@ -18,6 +18,8 @@ function formatTimestamp(iso: string): string {
   return new Date(iso).toISOString().replace('T', ' ').slice(0, 19)
 }
 
+import { RevokeGrantButton, ForceRotateKeysButton } from './_components/ComplianceVaultActions'
+
 export default async function CompliancePage() {
   await requireRole(['compliance', 'admin'])
 
@@ -143,7 +145,7 @@ export default async function CompliancePage() {
                             </span>
                           </td>
                           <td>
-                            <button className="btn btn-danger btn-sm">REVOKE</button>
+                            <RevokeGrantButton grantId={g.id} />
                           </td>
                         </tr>
                       )
@@ -178,9 +180,7 @@ export default async function CompliancePage() {
                 </div>
               ))}
 
-              <button className="btn btn-secondary btn-full" style={{ marginTop: '0.75rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase', gap: '0.5rem' }}>
-                ↻ Force Rotate Keys
-              </button>
+              <ForceRotateKeysButton />
             </div>
           </div>
         </div>
