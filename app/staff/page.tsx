@@ -196,7 +196,7 @@ export default async function StaffDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {recentComplaints.map(c => (
+                {recentComplaints.map((c: any) => (
                   <tr key={c.id}>
                     <td>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--green-bright)', marginBottom: '0.2rem' }}>{agsId(c.id)}</p>
