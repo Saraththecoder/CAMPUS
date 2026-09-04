@@ -30,10 +30,23 @@ async function getStaffStats(departmentId: string | null, role: string) {
 }
 
 async function getRecentComplaints(departmentId: string | null, role: string) {
-  let query = adminClient.from('staff_complaint_queue').select('*').order('priority_score', { ascending: false }).limit(6)
-  if (role === 'staff' && departmentId) query = query.eq('department_id', departmentId)
-  const { data } = await (query as any)
-  return (data ?? []) as any[]
+  try {
+    let query = adminClient.from('staff_complaint_queue').select('*').order('priority_score', { ascending: false }).limit(6)
+    if (role === 'staff' && departmentId) query = query.eq('department_id', departmentId)
+    const { data, error } = await (query as any)
+    if (!error && data) return data
+
+    let fallbackQuery = adminClient.from('complaints').select('*, departments(name)').order('priority_score', { ascending: false }).limit(6)
+    if (role === 'staff' && departmentId) fallbackQuery = fallbackQuery.eq('department_id', departmentId)
+    const { data: fallbackData } = await (fallbackQuery as any)
+    return (fallbackData ?? []).map((c: any) => ({
+      ...c,
+      department_name: c.departments?.name ?? 'Unassigned',
+      days_since_assigned: Math.max(0, (Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+    }))
+  } catch {
+    return []
+  }
 }
 
 function agsId(id: string): string {

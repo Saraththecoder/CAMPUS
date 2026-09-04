@@ -30,9 +30,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session
-  const { data: { user } } = await supabase.auth.getUser()
-  const role = user?.app_metadata?.role ?? 'student'
   const pathname = request.nextUrl.pathname
 
   // Protected route guards
@@ -40,6 +37,17 @@ export async function middleware(request: NextRequest) {
   const isComplianceRoute = pathname.startsWith('/compliance')
   const isAdminRoute = pathname.startsWith('/admin')
   const isApiProtected = pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')
+  const isProtectedRoute = isStaffRoute || isComplianceRoute || isAdminRoute || isApiProtected
+
+  // Fast path for public pages when no auth cookie is present
+  const hasAuthCookie = request.cookies.getAll().some(c => c.name.includes('sb-') || c.name.includes('auth'))
+  if (!isProtectedRoute && !hasAuthCookie) {
+    return supabaseResponse
+  }
+
+  // Refresh session
+  const { data: { user } } = await supabase.auth.getUser()
+  const role = user?.app_metadata?.role ?? 'student'
 
   // Not authenticated → redirect to login for protected routes
   if (!user && (isStaffRoute || isComplianceRoute || isAdminRoute)) {

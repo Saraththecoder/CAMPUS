@@ -29,26 +29,64 @@ export default async function StaffQueuePage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = parseInt(params.page ?? '1')
   const pageSize = 25
-
-  let query = adminClient
-    .from('staff_complaint_queue')
-    .select('*')
-    .order('priority_score', { ascending: false })
-
-  // Staff only see their department
-  if (session.role === 'staff' && session.departmentId) {
-    query = query.eq('department_id', session.departmentId)
-  }
-
-  if (params.status) query = query.eq('status', params.status as ComplaintStatus)
-  if (params.category) query = query.eq('category', params.category as ComplaintCategory)
-  if (params.severity) query = query.eq('severity', params.severity as ComplaintSeverity)
-  if (params.escalated === 'true') query = query.gt('escalation_level', 0)
-
   const from = (page - 1) * pageSize
-  query = query.range(from, from + pageSize - 1)
 
-  const { data: complaints, error } = await (query as any)
+  let complaints: any[] = []
+  let error: any = null
+
+  try {
+    let query = adminClient
+      .from('staff_complaint_queue')
+      .select('*')
+      .order('priority_score', { ascending: false })
+
+    if (session.role === 'staff' && session.departmentId) {
+      query = query.eq('department_id', session.departmentId)
+    }
+
+    if (params.status) query = query.eq('status', params.status as ComplaintStatus)
+    if (params.category) query = query.eq('category', params.category as ComplaintCategory)
+    if (params.severity) query = query.eq('severity', params.severity as ComplaintSeverity)
+    if (params.escalated === 'true') query = query.gt('escalation_level', 0)
+
+    query = query.range(from, from + pageSize - 1)
+
+    const res = await (query as any)
+
+    if (res.error) {
+      // Fallback to querying complaints table directly if view is missing
+      let fallbackQuery = adminClient
+        .from('complaints')
+        .select('*, departments(name)')
+        .order('priority_score', { ascending: false })
+
+      if (session.role === 'staff' && session.departmentId) {
+        fallbackQuery = fallbackQuery.eq('department_id', session.departmentId)
+      }
+      if (params.status) fallbackQuery = fallbackQuery.eq('status', params.status as ComplaintStatus)
+      if (params.category) fallbackQuery = fallbackQuery.eq('category', params.category as ComplaintCategory)
+      if (params.severity) fallbackQuery = fallbackQuery.eq('severity', params.severity as ComplaintSeverity)
+      if (params.escalated === 'true') fallbackQuery = fallbackQuery.gt('escalation_level', 0)
+
+      fallbackQuery = fallbackQuery.range(from, from + pageSize - 1)
+      const fallbackRes = await (fallbackQuery as any)
+
+      if (fallbackRes.error) {
+        error = fallbackRes.error
+      } else {
+        complaints = (fallbackRes.data ?? []).map((c: any) => ({
+          ...c,
+          department_name: c.departments?.name ?? 'Unassigned',
+          days_since_assigned: Math.max(0, (Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24)),
+        }))
+      }
+    } else {
+      complaints = res.data ?? []
+    }
+  } catch (err) {
+    console.error('[STAFF_QUEUE_ERROR]', err)
+    error = err
+  }
 
   return (
     <div>
