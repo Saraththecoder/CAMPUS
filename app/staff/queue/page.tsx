@@ -52,13 +52,60 @@ export default async function StaffQueuePage({ searchParams }: PageProps) {
 
   return (
     <div>
-      <div style={{ marginBottom: 'var(--space-6)' }}>
+      {/* Breadcrumb Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        {['admin', 'compliance'].includes(session.role) ? (
+          <>
+            <Link href="/admin" style={{ color: 'var(--green-bright)', textDecoration: 'none' }}>Admin Control Center</Link>
+            <span>/</span>
+          </>
+        ) : (
+          <>
+            <Link href="/staff" style={{ color: 'var(--green-bright)', textDecoration: 'none' }}>Staff Dashboard</Link>
+            <span>/</span>
+          </>
+        )}
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Triage Queue</span>
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-5)' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-          Complaint Queue
+          Incident Triage Queue
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: '0.9rem' }}>
-          {session.role === 'staff' ? 'Your department\'s complaints' : 'All complaints'}
+          {session.role === 'staff' ? 'Your department\'s assigned complaints' : 'All campus complaint reports across all departments'}
         </p>
+      </div>
+
+      {/* Quick Status Pills */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        {[
+          { label: 'All Reports', value: '' },
+          { label: 'Submitted', value: 'submitted' },
+          { label: 'In Progress', value: 'in_progress' },
+          { label: 'Disputed', value: 'disputed' },
+          { label: 'Resolved', value: 'resolved' },
+        ].map(tab => {
+          const isActive = (params.status ?? '') === tab.value
+          return (
+            <Link
+              key={tab.label}
+              href={tab.value ? `/staff/queue?status=${tab.value}` : '/staff/queue'}
+              className="btn btn-sm"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                background: isActive ? 'var(--green-bright)' : 'var(--bg-card)',
+                color: isActive ? '#0b0d0c' : 'var(--text-secondary)',
+                border: '1px solid',
+                borderColor: isActive ? 'var(--green-bright)' : 'var(--border-default)',
+                fontWeight: isActive ? 700 : 500,
+              }}
+            >
+              {tab.label}
+            </Link>
+          )
+        })}
       </div>
 
       {/* Filters */}

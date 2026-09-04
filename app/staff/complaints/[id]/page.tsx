@@ -80,6 +80,21 @@ export default async function StaffComplaintDetailPage({ params }: Props) {
 
   return (
     <div style={{ maxWidth: '900px' }}>
+      {/* Navigation Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+        <a href="/staff/queue" className="btn btn-ghost btn-sm" style={{ gap: '0.35rem', padding: '0.25rem 0.5rem' }}>
+          ← Back to Triage Queue
+        </a>
+        {['admin', 'compliance'].includes(session.role) && (
+          <>
+            <span style={{ color: 'var(--border-default)' }}>|</span>
+            <a href="/admin" className="btn btn-ghost btn-sm" style={{ color: 'var(--text-muted)' }}>
+              Admin Panel
+            </a>
+          </>
+        )}
+      </div>
+
       <div style={{ marginBottom: 'var(--space-5)' }}>
         {complaint.visibility === 'restricted' && (
           <div className="restricted-banner" style={{ marginBottom: 'var(--space-4)' }}>
