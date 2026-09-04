@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -162,7 +163,13 @@ export default function UserManagementView() {
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <Link href="/admin" style={{ color: 'var(--green-bright)', textDecoration: 'none' }}>Admin Control Center</Link>
+        <span>/</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>User Accounts</span>
+      </div>
 
       {/* Top Header */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: '1.5rem' }}>

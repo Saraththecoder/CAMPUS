@@ -25,7 +25,16 @@ export default async function RestrictedComplaintsPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 'var(--space-6)' }}>
+      {/* Breadcrumbs Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <Link href="/admin" style={{ color: 'var(--green-bright)', textDecoration: 'none' }}>Admin Control Center</Link>
+        <span>/</span>
+        <Link href="/compliance" style={{ color: 'var(--purple-bright)', textDecoration: 'none' }}>Compliance Vault</Link>
+        <span>/</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Restricted Complaints</span>
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-5)' }}>
         <div className="flex items-center gap-3 mb-2">
           <Lock size={22} style={{ color: 'var(--color-danger-600)' }} aria-hidden="true" />
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
