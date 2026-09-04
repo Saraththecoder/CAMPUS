@@ -38,7 +38,10 @@ export async function getSession(): Promise<AppSession | null> {
       departmentId: appMeta.department_id ?? null,
       isVerified: userMeta.email_verified === true || appMeta.verified === true,
     }
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.digest === 'DYNAMIC_SERVER_USAGE' || err?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw err
+    }
     console.error('[GET_SESSION_ERROR]', err)
     return null
   }
