@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
   // Role-based access control (defense-in-depth — RLS is the real gate)
   if (user) {
-    if (isAdminRoute && role !== 'admin') {
+    if (isAdminRoute && !['admin', 'compliance'].includes(role)) {
       return NextResponse.redirect(new URL('/unauthorized', request.url))
     }
     if (isComplianceRoute && !['compliance', 'admin'].includes(role)) {
