@@ -24,7 +24,7 @@ const EvidenceRequestSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  ctx: RouteContext<'/api/complaints/[id]/evidence'>
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -38,8 +38,7 @@ export async function POST(
       return NextResponse.json({ error: 'Institutional email required' }, { status: 403 })
     }
 
-    const params = await ctx.params
-    const { id: complaintId } = params
+    const { id: complaintId } = await params
 
     let body: unknown
     try { body = await request.json() } catch {
@@ -161,13 +160,12 @@ export async function POST(
 // GET /api/complaints/[id]/evidence — Get evidence for a complaint (authorized access)
 export async function GET(
   request: NextRequest,
-  ctx: RouteContext<'/api/complaints/[id]/evidence'>
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const params = await ctx.params
-    const { id: complaintId } = params
+    const { id: complaintId } = await params
 
     // Get complaint visibility
     const { data: complaint } = await supabase

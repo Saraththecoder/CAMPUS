@@ -19,7 +19,7 @@ const StatusUpdateSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  ctx: RouteContext<'/api/complaints/[id]/status'>
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -34,8 +34,7 @@ export async function POST(
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
-    const params = await ctx.params
-    const { id: complaintId } = params
+    const { id: complaintId } = await params
 
     let body: unknown
     try {

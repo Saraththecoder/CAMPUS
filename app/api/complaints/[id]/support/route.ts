@@ -11,7 +11,7 @@ import { validateInstitutionalEmail } from '@/lib/security/hmac'
 
 export async function POST(
   request: NextRequest,
-  ctx: RouteContext<'/api/complaints/[id]/support'>
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -25,8 +25,7 @@ export async function POST(
       return NextResponse.json({ error: 'Institutional email required' }, { status: 403 })
     }
 
-    const params = await ctx.params
-    const { id: complaintId } = params
+    const { id: complaintId } = await params
 
     // Derive tokens server-side — never from client input
     const submitterHash = deriveSubmitterHash(user.email)
