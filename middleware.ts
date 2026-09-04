@@ -1,30 +1,37 @@
 // middleware.ts
 // Route protection middleware — runs before every request.
-// This is NOT the primary security mechanism (RLS and server-side checks are).
-// But it provides user-facing redirects and session refresh.
+// Provides user-facing redirects and session refresh with fallback protection.
 
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const DEFAULT_URL = 'https://placeholder.supabase.co'
+const DEFAULT_KEY = 'placeholder-key'
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_KEY
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet: any) {
-          cookiesToSet.forEach(({ name, value }: any) =>
-            request.cookies.set(name, value)
-          )
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }: any) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value }: any) =>
+              request.cookies.set(name, value)
+            )
+            supabaseResponse = NextResponse.next({ request })
+            cookiesToSet.forEach(({ name, value, options }: any) =>
+              supabaseResponse.cookies.set(name, value, options)
+            )
+          } catch {}
         },
       },
     }
@@ -45,19 +52,25 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Refresh session
-  const { data: { user } } = await supabase.auth.getUser()
+  let user: any = null
+  try {
+    const res = await supabase.auth.getUser()
+    user = res.data?.user ?? null
+  } catch {
+    user = null
+  }
+
   const role = user?.app_metadata?.role ?? 'student'
 
   // Not authenticated → redirect to login for protected routes
-  if (!user && (isStaffRoute || isComplianceRoute || isAdminRoute)) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
+  if (!user && (isStaffRoute || isComplianceRoute || isAdminRole(pathname))) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(redirectUrl)
   }
 
-  // Role-based access control (defense-in-depth — RLS is the real gate)
+  // Role-based access control
   if (user) {
     if (isAdminRoute && !['admin', 'compliance'].includes(role)) {
       return NextResponse.redirect(new URL('/unauthorized', request.url))
@@ -71,6 +84,10 @@ export async function middleware(request: NextRequest) {
   }
 
   return supabaseResponse
+}
+
+function isAdminRole(pathname: string) {
+  return pathname.startsWith('/admin')
 }
 
 export const config = {

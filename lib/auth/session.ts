@@ -17,24 +17,30 @@ export interface AppSession {
 
 /**
  * Get the current server-side session.
- * Returns null if no session exists.
+ * Returns null if no session exists or if error occurs.
  */
 export async function getSession(): Promise<AppSession | null> {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.auth.getUser()
 
-  if (error || !user) return null
+    if (error || !data?.user) return null
 
-  const appMeta = user.app_metadata ?? {}
-  const userMeta = user.user_metadata ?? {}
+    const user = data.user
+    const appMeta = user.app_metadata ?? {}
+    const userMeta = user.user_metadata ?? {}
 
-  return {
-    userId: user.id,
-    email: user.email ?? '',
-    role: (appMeta.role as UserRole) ?? 'student',
-    collegeId: appMeta.college_id ?? null,
-    departmentId: appMeta.department_id ?? null,
-    isVerified: userMeta.email_verified === true || appMeta.verified === true,
+    return {
+      userId: user.id,
+      email: user.email ?? '',
+      role: (appMeta.role as UserRole) ?? 'student',
+      collegeId: appMeta.college_id ?? null,
+      departmentId: appMeta.department_id ?? null,
+      isVerified: userMeta.email_verified === true || appMeta.verified === true,
+    }
+  } catch (err) {
+    console.error('[GET_SESSION_ERROR]', err)
+    return null
   }
 }
 
