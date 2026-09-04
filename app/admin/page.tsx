@@ -79,11 +79,11 @@ export default async function AdminDashboardPage() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link href="/admin/users" className="btn btn-terminal">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', width: '100%', maxWidth: 450 }}>
+            <Link href="/admin/users" className="btn btn-terminal" style={{ flex: '1 1 200px', justifyContent: 'center' }}>
               <FileSpreadsheet size={15} /> User Management &amp; Excel
             </Link>
-            <Link href="/staff/queue" className="btn btn-secondary">
+            <Link href="/staff/queue" className="btn btn-secondary" style={{ flex: '1 1 140px', justifyContent: 'center' }}>
               <FileText size={15} /> Triage Queue
             </Link>
           </div>

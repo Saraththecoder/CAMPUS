@@ -6,9 +6,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await requireRole(['admin', 'compliance'])
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div className="page-layout">
       <StaffSidebar role={session.role} departmentId={session.departmentId} />
-      <main id="main-content" style={{ flex: 1, padding: '2rem 2.5rem', minWidth: 0 }}>
+      <main id="main-content" className="main-content">
         {children}
       </main>
     </div>
