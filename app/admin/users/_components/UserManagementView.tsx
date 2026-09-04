@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   UserPlus, Upload, Users, Shield, Loader2, CheckCircle2,
-  AlertTriangle, Search, FileSpreadsheet, Key
+  AlertTriangle, Search, FileSpreadsheet, Key, Trash2
 } from 'lucide-react'
 
 interface UserItem {
@@ -19,6 +19,7 @@ export default function UserManagementView() {
   const [users, setUsers] = useState<UserItem[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [search, setSearch] = useState('')
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
 
   // Manual User Creation State
   const [email, setEmail] = useState('')
@@ -43,6 +44,50 @@ export default function UserManagementView() {
       toast.error('Failed to load user list')
     } finally {
       setLoadingUsers(false)
+    }
+  }
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setUpdatingUserId(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? 'Failed to update user role')
+        return
+      }
+      toast.success(`Role updated to ${newRole}`)
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u))
+    } catch {
+      toast.error('Error updating user role')
+    } finally {
+      setUpdatingUserId(null)
+    }
+  }
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Are you sure you want to permanently delete user ${userEmail}?`)) return
+
+    setUpdatingUserId(userId)
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? 'Failed to delete user account')
+        return
+      }
+      toast.success(`Account deleted: ${userEmail}`)
+      setUsers(prev => prev.filter(u => u.id !== userId))
+    } catch {
+      toast.error('Error deleting user account')
+    } finally {
+      setUpdatingUserId(null)
     }
   }
 
@@ -298,6 +343,7 @@ export default function UserManagementView() {
                     <th>Role</th>
                     <th>Created</th>
                     <th>Last Sign In</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -307,15 +353,44 @@ export default function UserManagementView() {
                         {u.email}
                       </td>
                       <td>
-                        <span className={`badge badge-${u.role === 'admin' ? 'critical' : u.role === 'compliance' ? 'in_progress' : u.role === 'staff' ? 'assigned' : 'submitted'}`}>
-                          {u.role}
-                        </span>
+                        <select
+                          value={u.role}
+                          disabled={updatingUserId === u.id}
+                          onChange={e => handleRoleChange(u.id, e.target.value)}
+                          style={{
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-default)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '0.2rem 0.5rem',
+                            color: u.role === 'admin' ? 'var(--red-bright)' : u.role === 'compliance' ? 'var(--purple-bright)' : u.role === 'staff' ? 'var(--amber-bright)' : 'var(--green-bright)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <option value="student">Student</option>
+                          <option value="staff">Staff</option>
+                          <option value="compliance">Compliance</option>
+                          <option value="admin">Admin</option>
+                        </select>
                       </td>
                       <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                         {new Date(u.created_at).toLocaleDateString()}
                       </td>
                       <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                         {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : 'Never'}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleDeleteUser(u.id, u.email)}
+                          disabled={updatingUserId === u.id}
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--red-bright)', gap: '0.25rem', padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                          title="Delete User Account"
+                        >
+                          <Trash2 size={13} /> Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

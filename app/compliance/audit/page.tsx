@@ -4,6 +4,7 @@
 import { requireRole } from '@/lib/auth/session'
 import { adminClient } from '@/lib/supabase/admin'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { format } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Audit Log' }
@@ -32,7 +33,16 @@ export default async function AuditLogPage({ searchParams }: PageProps) {
 
   return (
     <div>
-      <div style={{ marginBottom: 'var(--space-6)' }}>
+      {/* Breadcrumb Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <Link href="/admin" style={{ color: 'var(--green-bright)', textDecoration: 'none' }}>Admin Control Center</Link>
+        <span>/</span>
+        <Link href="/compliance" style={{ color: 'var(--purple-bright)', textDecoration: 'none' }}>Compliance Vault</Link>
+        <span>/</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Audit Log</span>
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-5)' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Audit Log</h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: '0.9rem' }}>
           Immutable record of all actions taken in the system. Append-only.
